@@ -18,6 +18,26 @@ npm run dev
 
 Open the URL printed by Vite. For a production bundle, run `npm run build`; `npm run preview` serves that bundle locally.
 
+## Deploy to Vercel
+
+The frontend repository includes `vercel.json` with an SPA rewrite, so direct visits and refreshes on routes such as `/tasks/123` resolve to the React app. Build settings for Vite are:
+
+- Framework preset: Vite
+- Root directory: `./` when importing the frontend-only repository
+- Install command: `npm install`
+- Build command: `npm run build`
+- Output directory: `dist`
+
+In Vercel, import the **frontend repository** (not the workspace/backend repository), then add this project environment variable for Production and Preview deployments:
+
+```env
+VITE_API_BASE_URL=https://your-deployed-backend.example.com/api
+```
+
+The backend URL must be public HTTPS in production. Production builds always use REST mode, even if `VITE_API_MODE=mock` is mistakenly configured; local Vite development continues to use mock mode by default. If the API URL is missing, requests show a configuration error rather than falling back to demo data. `VITE_` variables are bundled into public browser code, so never put credentials or signing secrets in them.
+
+After deploying, add the exact Vercel site origin (for example, `https://your-project.vercel.app`) to the backend's `CORS_ALLOWED_ORIGINS`, alongside any other required frontend origins, and redeploy/restart the backend. Do not use `*`. If using Vercel preview URLs, explicitly allow the preview origins you need or test against a stable preview domain.
+
 ## API mode
 
 The default `.env.example` selects `VITE_API_MODE=mock`. This uses `src/api/mockApi.js` and stores demo tasks in browser local storage. It is a development aid, not an authentication substitute and not backend data. The demo account is `alex.morgan@example.com` with password `Taskflow123!`; newly registered mock credentials remain in memory only and reset after a full page reload, so no password is written to browser storage.
